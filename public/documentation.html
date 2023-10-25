@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IMFb</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;400&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -16,12 +21,118 @@
         It provides users with access to information about different
         movies, directors, and genres. Users will be able to sign up, update their
         personal information, and create a list of their favorite movies.
-        <h3 style="margin-bottom: 0;">Retrieving a list of the top 100 rated movies in JSON format:</h3>
-        GET /movies
-        <br>
         <br>
         Go back to the main page from <a href="index.html">here</a>
     </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Request</th>
+                <th>URL</th>
+                <th>HTTP Method</th>
+                <th>Request body data format</th>
+                <th>Response body data format</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Return a list of all movies to the user</td>
+                <td>/movies</td>
+                <td>GET</td>
+                <td>None</td>
+                <td>A JSON object containing a list of all movies</td>
+            </tr>
+            <tr>
+                <td>Return data about a single movie to the user by title</td>
+                <td>/movies/[title]</td>
+                <td>GET</td>
+                <td>None</td>
+                <td>
+                    A JSON object holding data about a single movie by title (description, genre, director, image URL)
+                </td>
+            </tr>
+            <tr>
+                <td>Return data about a genre by name</td>
+                <td>/genres/[name]</td>
+                <td>GET</td>
+                <td>None</td>
+                <td>
+                    A JSON object holding data about the name of the genre and a description
+                </td>
+            </tr>
+            <tr>
+                <td>Return data about a director by name</td>
+                <td>/directors/[name]</td>
+                <td>GET</td>
+                <td>None</td>
+                <td>
+                    A JSON object holding data about a director's name, bio, birth year, and death year
+                </td>
+            </tr>
+            <tr>
+                <td>Allows new users to register</td>
+                <td>/users</td>
+                <td>POST</td>
+                <td>
+                    A JSON object containing a username, password, and email (keys should be in lowercase)<br>
+                    <br>
+                    Example:<br>
+                    {<br>
+                    &nbsp;&nbsp;"username": "JimBob",<br>
+                    &nbsp;&nbsp;"password": "abcd1234",<br>
+                    &nbsp;&nbsp;"email": "jimbobjoe@example.com"<br>
+                    }
+                </td>
+                <td>
+                    A JSON object holding data about the user's name, password, email, ID, and favorite movies
+                </td>
+            </tr>
+            <tr>
+                <td>Allows users to update their info by username</td>
+                <td>/users/[username]</td>
+                <td>PUT</td>
+                <td>
+                    A JSON object containing the information that is to be amended<br>
+                    <br>
+                    Example:<br>
+                    {<br>
+                    &nbsp;&nbsp;"Birth_Date": "1945-01-01"<br>
+                    }
+                </td>
+                <td>
+                    A text message confirming that the user has successfully updated the requested information
+                </td>
+            </tr>
+            <tr>
+                <td>Allows users to add a movie to their list of favorites</td>
+                <td>/users/[username]/movies/[movieID]</td>
+                <td>POST</td>
+                <td>None</td>
+                <td>
+                    A text message indicating that the movie has been added to the user's list of favorites
+                </td>
+            </tr>
+            <tr>
+                <td>Allows users to remove a movie from their list of favorites</td>
+                <td>/users/[username]/movies/[movieID]</td>
+                <td>DELETE</td>
+                <td>None</td>
+                <td>
+                    A text message indicating that the movie has been removed from the user's list of favorites
+                </td>
+            </tr>
+            <tr>
+                <td>Allows existing users to deregister</td>
+                <td>/users/[username]</td>
+                <td>DELETE</td>
+                <td>None</td>
+                <td>
+                    A text message indicating that the user has successfully deregistered their account
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
 </body>
 
 </html>
