@@ -4,8 +4,22 @@ const uuid = require("uuid");
 const morgan = require("morgan");
 const fs = require("fs");
 const path = require("path");
+const mongoose = require("mongoose");
+const Models = require("./models.js");
 
+const Movies = Models.Movie;
+const Users = Models.User;
 const app = express();
+
+mongoose.connect("mongodb://127.0.0.1:27017/moviedb");
+
+// Movies.find({ "Genre.Name": "Action" })
+//   .then((movies) => {
+//     console.log(movies);
+//   })
+//   .catch((err) => {
+//     console.log(err);
+//   });
 
 let accessLogStream = fs.createWriteStream(
   path.join(__dirname, "/logs/access.log"),
@@ -39,84 +53,217 @@ function morganFormatted(tokens, req, res) {
 }
 
 app.use(morgan(morganFormatted)); //Log to console
-
 app.use(morgan(morganFormatted, { stream: accessLogStream })); //Log to "/logs/access.log"
-
 app.use(bodyParser.json());
-
 app.use(express.static("public"));
 
-app.get("/movies", (req, res) => {
-  res.sendFile(path.join(__dirname + "/movies.json"));
+//1. Return a list of all movies to the user
+app.get("/movies", async (req, res) => {
+  await Movies.find()
+    .then((movies) => res.status(200).json(movies))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send("Error: " + err);
+    });
 });
 
-app.get("/movies/:title", (req, res) => {
-  res.send(
-    "A JSON object holding data about a single movie by title (description, genre, director, image URL)"
-  );
+//2. Return data about a single movie to the user by title
+app.get("/movies/:title", async (req, res) => {
+  let movieName =
+    req.params.title.charAt(0).toUpperCase() + req.params.title.slice(1); //format input to match database name format
+  await Movies.findOne({ Title: { $regex: new RegExp(req.params.title, "i") } })
+    .then((movie) => {
+      if (movie) {
+        res.status(200).json(movie);
+      } else {
+        res
+          .status(404)
+          .send(
+            'Movie "' + req.params.title + '" was not found in the database.'
+          ); //find approprivate status code
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error: " + err);
+    });
 });
 
-app.get("/genres/:name", (req, res) => {
-  res.send(
-    "A JSON object holding data about the name of the genre and a description"
-  );
+//3. Return data about a genre by name
+app.get("/genres/:name", async (req, res) => {
+  //Uses RegEx to make the search case insensitive and returns only the genre name and description from one movie that contains it
+  await Movies.findOne(
+    { "Genre.Name": { $regex: new RegExp(req.params.name, "i") } },
+    { "Genre.Name": 1, "Genre.Description": 1, _id: 0 }
+  )
+    .then((genre) => {
+      if (genre) {
+        res.status(200).json(genre);
+      } else {
+        res
+          .status(404)
+          .send(
+            'Genre "' + req.params.name + '" was not found in the database.'
+          );
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error: " + err);
+    });
 });
 
-app.get("/directors/:name", (req, res) => {
-  res.send(
-    "A JSON object holding data about a director's name, bio, birth year, and death year"
-  );
+//4. Return data about a director by name
+app.get("/directors/:name", async (req, res) => {
+  //Uses RegEx to make the search case insensitive and returns only the genre name and description from one movie that contains it
+  await Movies.findOne(
+    { "Director.Name": { $regex: new RegExp(req.params.name, "i") } },
+    { "Director.Name": 1, "Director.Bio": 1, _id: 0 }
+  )
+    .then((director) => {
+      if (director) {
+        res.status(200).json(director);
+      } else {
+        res
+          .status(404)
+          .send(
+            'Director "' + req.params.name + '" was not found in the database.'
+          );
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error: " + err);
+    });
 });
 
-app.post("/users", (req, res) => {
-  let newUser = req.body;
-
-  if (newUser.username && newUser.password && newUser.email) {
-    newUser.id = uuid.v4();
-    res
-      .status(201)
-      .send(
-        "Successfully registered new user: \n" +
-          JSON.stringify(newUser, undefined, 4)
-      );
-  } else {
-    const message = "Missing or wrong parameters in request body";
-    res.status(400).send(message);
-  }
+// Get a user by username
+app.get("/users/:Username", async (req, res) => {
+  await Users.findOne({ Username: req.params.Username })
+    .then((user) => {
+      res.json(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error: " + err);
+    });
 });
 
-app.put("/users/:username", (req, res) => {
-  let updatedInfo = req.body;
-  res
-    .status(201)
-    .send(
-      "Successfully updated info: \n" +
-        JSON.stringify(updatedInfo, undefined, 4)
-    );
+//5. Allows new users to register
+app.post("/users", async (req, res) => {
+  await Users.findOne({ Username: req.body.Username })
+    .then((user) => {
+      if (user) {
+        return res
+          .status(400)
+          .send('User "' + req.body.Username + '" already exists');
+      } else {
+        Users.create({
+          Username: req.body.Username,
+          Password: req.body.Password,
+          Email: req.body.Email,
+          Birthday: req.body.Birthday,
+        })
+          .then((user) => {
+            res.status(201).json(user);
+          })
+          .catch((err) => {
+            if (err.name === "MongoServerError" && err.code === 11000) {
+              // Duplicate email
+              return res.status(422).send("Email already registered.");
+            }
+            // Some other error
+            return res.status(422).send(err);
+          });
+      }
+    })
+    .catch((error) => {
+      res.status(500).send("Error: " + error);
+    });
 });
 
-app.post("/users/:username/movies/:movieID", (req, res) => {
-  res.send(
-    "A text message indicating that the movie has been added to the user's list of favorites"
-  );
+//6. Allows users to update their info by username
+app.put("/users/:Username", async (req, res) => {
+  await Users.findOneAndUpdate(
+    { Username: req.params.Username },
+    {
+      $set: {
+        Username: req.body.Username,
+        Password: req.body.Password,
+        Email: req.body.Email,
+        Birthday: req.body.Birthday,
+      },
+    },
+    { new: true }
+  ) // This line makes sure that the updated document is returned
+    .then((updatedUser) => {
+      res.status(201).json(updatedUser);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error: " + err);
+    });
 });
 
-app.delete("/users/:username/movies/:movieID", (req, res) => {
-  res.send(
-    "A text message indicating that the movie has been removed from the user's list of favorites"
-  );
+//7. Allows users to add a movie to their list of favorites
+app.post("/users/:Username/movies/:movieID", async (req, res) => {
+  await Users.findOneAndUpdate(
+    { Username: req.params.Username },
+    {
+      $addToSet: { FavoriteMovies: req.params.movieID },
+    },
+    { new: true } // This line makes sure that the updated document is returned
+  )
+    .populate("FavoriteMovies")
+    .exec()
+    .then((updatedUser) => {
+      res.status(201).json(updatedUser);
+    })
+    .catch((err) => {
+      res.status(500).send("Error: " + err);
+    });
 });
 
-app.delete("/users/:username", (req, res) => {
-  res.send(
-    "A text message indicating that the user has successfully deregistered their account"
-  );
+//8. Allows users to remove a movie from their list of favorites
+app.delete("/users/:Username/movies/:movieID", async (req, res) => {
+  await Users.findOneAndUpdate(
+    { Username: req.params.Username },
+    {
+      $pull: { FavoriteMovies: req.params.movieID },
+    },
+    { new: true }
+  ) // This line makes sure that the updated document is returned
+    .then((updatedUser) => {
+      res.json(updatedUser);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error: " + err);
+    });
+});
+
+//9. Allows existing users to deregister
+app.delete("/users/:Username", async (req, res) => {
+  await Users.findOneAndDelete({ Username: req.params.Username })
+    .then((user) => {
+      if (!user) {
+        res
+          .status(400)
+          .send('User "' + req.params.Username + '" was not found');
+      } else {
+        res.status(200).send('User "' + req.params.Username + '" was deleted.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error: " + err);
+    });
 });
 
 app.use(function (req, res, next) {
   res.status(404);
 
-  res.send(`<h1>IMFb - A Movie Database Web App</h1>
+  res.send(`<h1>IMFb</h1>
     <h2>404</h2>
     <div>
       Page not found! Go back to the main page from <a href="index.html">here</a>
