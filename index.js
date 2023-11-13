@@ -57,97 +57,125 @@ app.use(morgan(morganFormatted, { stream: accessLogStream })); //Log to "/logs/a
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
+let auth = require("./auth")(app); //Endpoint for logging in as a registered user / located in auth.js
+const passport = require("passport");
+require("./passport");
+
 //1. Return a list of all movies to the user
-app.get("/movies", async (req, res) => {
-  await Movies.find()
-    .then((movies) => res.status(200).json(movies))
-    .catch((err) => {
-      console.log(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/movies",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    await Movies.find()
+      .then((movies) => res.status(200).json(movies))
+      .catch((err) => {
+        console.log(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //2. Return data about a single movie to the user by title
-app.get("/movies/:title", async (req, res) => {
-  let movieName =
-    req.params.title.charAt(0).toUpperCase() + req.params.title.slice(1); //format input to match database name format
-  await Movies.findOne({ Title: { $regex: new RegExp(req.params.title, "i") } })
-    .then((movie) => {
-      if (movie) {
-        res.status(200).json(movie);
-      } else {
-        res
-          .status(404)
-          .send(
-            'Movie "' + req.params.title + '" was not found in the database.'
-          ); //find approprivate status code
-      }
+app.get(
+  "/movies/:title",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let movieName =
+      req.params.title.charAt(0).toUpperCase() + req.params.title.slice(1); //format input to match database name format
+    await Movies.findOne({
+      Title: { $regex: new RegExp(req.params.title, "i") },
     })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+      .then((movie) => {
+        if (movie) {
+          res.status(200).json(movie);
+        } else {
+          res
+            .status(404)
+            .send(
+              'Movie "' + req.params.title + '" was not found in the database.'
+            ); //find approprivate status code
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //3. Return data about a genre by name
-app.get("/genres/:name", async (req, res) => {
-  //Uses RegEx to make the search case insensitive and returns only the genre name and description from one movie that contains it
-  await Movies.findOne(
-    { "Genre.Name": { $regex: new RegExp(req.params.name, "i") } },
-    { "Genre.Name": 1, "Genre.Description": 1, _id: 0 }
-  )
-    .then((genre) => {
-      if (genre) {
-        res.status(200).json(genre);
-      } else {
-        res
-          .status(404)
-          .send(
-            'Genre "' + req.params.name + '" was not found in the database.'
-          );
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/genres/:name",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    //Uses RegEx to make the search case insensitive and returns only the genre name and description from one movie that contains it
+    await Movies.findOne(
+      { "Genre.Name": { $regex: new RegExp(req.params.name, "i") } },
+      { "Genre.Name": 1, "Genre.Description": 1, _id: 0 }
+    )
+      .then((genre) => {
+        if (genre) {
+          res.status(200).json(genre);
+        } else {
+          res
+            .status(404)
+            .send(
+              'Genre "' + req.params.name + '" was not found in the database.'
+            );
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //4. Return data about a director by name
-app.get("/directors/:name", async (req, res) => {
-  //Uses RegEx to make the search case insensitive and returns only the genre name and description from one movie that contains it
-  await Movies.findOne(
-    { "Director.Name": { $regex: new RegExp(req.params.name, "i") } },
-    { "Director.Name": 1, "Director.Bio": 1, _id: 0 }
-  )
-    .then((director) => {
-      if (director) {
-        res.status(200).json(director);
-      } else {
-        res
-          .status(404)
-          .send(
-            'Director "' + req.params.name + '" was not found in the database.'
-          );
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/directors/:name",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    //Uses RegEx to make the search case insensitive and returns only the genre name and description from one movie that contains it
+    await Movies.findOne(
+      { "Director.Name": { $regex: new RegExp(req.params.name, "i") } },
+      { "Director.Name": 1, "Director.Bio": 1, _id: 0 }
+    )
+      .then((director) => {
+        if (director) {
+          res.status(200).json(director);
+        } else {
+          res
+            .status(404)
+            .send(
+              'Director "' +
+                req.params.name +
+                '" was not found in the database.'
+            );
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 // Get a user by username
-app.get("/users/:Username", async (req, res) => {
-  await Users.findOne({ Username: req.params.Username })
-    .then((user) => {
-      res.json(user);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.get(
+  "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    await Users.findOne({ Username: req.params.Username })
+      .then((user) => {
+        res.json(user);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //5. Allows new users to register
 app.post("/users", async (req, res) => {
@@ -183,82 +211,106 @@ app.post("/users", async (req, res) => {
 });
 
 //6. Allows users to update their info by username
-app.put("/users/:Username", async (req, res) => {
-  await Users.findOneAndUpdate(
-    { Username: req.params.Username },
-    {
-      $set: {
-        Username: req.body.Username,
-        Password: req.body.Password,
-        Email: req.body.Email,
-        Birthday: req.body.Birthday,
+app.put(
+  "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    console.log(req.user, req.params.Username);
+    // CONDITION TO CHECK ADDED HERE
+    if (req.user.Username !== req.params.Username) {
+      return res.status(400).send("Permission denied");
+    }
+    // CONDITION ENDS
+    await Users.findOneAndUpdate(
+      { Username: req.params.Username },
+      {
+        $set: {
+          Username: req.body.Username,
+          Password: req.body.Password,
+          Email: req.body.Email,
+          Birthday: req.body.Birthday,
+        },
       },
-    },
-    { new: true }
-  ) // This line makes sure that the updated document is returned
-    .then((updatedUser) => {
-      res.status(201).json(updatedUser);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+      { new: true }
+    ) // This line makes sure that the updated document is returned
+      .then((updatedUser) => {
+        res.status(201).json(updatedUser);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //7. Allows users to add a movie to their list of favorites
-app.post("/users/:Username/movies/:movieID", async (req, res) => {
-  await Users.findOneAndUpdate(
-    { Username: req.params.Username },
-    {
-      $addToSet: { FavoriteMovies: req.params.movieID },
-    },
-    { new: true } // This line makes sure that the updated document is returned
-  )
-    .populate("FavoriteMovies")
-    .exec()
-    .then((updatedUser) => {
-      res.status(201).json(updatedUser);
-    })
-    .catch((err) => {
-      res.status(500).send("Error: " + err);
-    });
-});
+app.post(
+  "/users/:Username/movies/:movieID",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    await Users.findOneAndUpdate(
+      { Username: req.params.Username },
+      {
+        $addToSet: { FavoriteMovies: req.params.movieID },
+      },
+      { new: true } // This line makes sure that the updated document is returned
+    )
+      .populate("FavoriteMovies")
+      .exec()
+      .then((updatedUser) => {
+        res.status(201).json(updatedUser);
+      })
+      .catch((err) => {
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //8. Allows users to remove a movie from their list of favorites
-app.delete("/users/:Username/movies/:movieID", async (req, res) => {
-  await Users.findOneAndUpdate(
-    { Username: req.params.Username },
-    {
-      $pull: { FavoriteMovies: req.params.movieID },
-    },
-    { new: true }
-  ) // This line makes sure that the updated document is returned
-    .then((updatedUser) => {
-      res.json(updatedUser);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.delete(
+  "/users/:Username/movies/:movieID",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    await Users.findOneAndUpdate(
+      { Username: req.params.Username },
+      {
+        $pull: { FavoriteMovies: req.params.movieID },
+      },
+      { new: true }
+    ) // This line makes sure that the updated document is returned
+      .then((updatedUser) => {
+        res.json(updatedUser);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 //9. Allows existing users to deregister
-app.delete("/users/:Username", async (req, res) => {
-  await Users.findOneAndDelete({ Username: req.params.Username })
-    .then((user) => {
-      if (!user) {
-        res
-          .status(400)
-          .send('User "' + req.params.Username + '" was not found');
-      } else {
-        res.status(200).send('User "' + req.params.Username + '" was deleted.');
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error: " + err);
-    });
-});
+app.delete(
+  "/users/:Username",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    await Users.findOneAndDelete({ Username: req.params.Username })
+      .then((user) => {
+        if (!user) {
+          res
+            .status(400)
+            .send('User "' + req.params.Username + '" was not found');
+        } else {
+          res
+            .status(200)
+            .send('User "' + req.params.Username + '" was deleted.');
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send("Error: " + err);
+      });
+  }
+);
 
 app.use(function (req, res, next) {
   res.status(404);
