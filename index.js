@@ -12,7 +12,8 @@ const Movies = Models.Movie;
 const Users = Models.User;
 const app = express();
 
-mongoose.connect("mongodb://127.0.0.1:27017/moviedb");
+// mongoose.connect("mongodb://127.0.0.1:27017/moviedb");
+mongoose.connect(process.env.CONNECTION_URI);
 
 // Movies.find({ "Genre.Name": "Action" })
 //   .then((movies) => {
