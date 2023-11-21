@@ -241,25 +241,34 @@ app.post(
 app.put(
   "/users/:Username",
   [
-    check("Username").optional({checkFalsy: true}).not().isEmpty(),
-    check('Password').optional({checkFalsy: true}).not().isEmpty(),
-    check('Email', 'Please enter a valid email.').optional({checkFalsy: true}).isEmail(),
-    check('Birthday', 'Birthday needs to be in the follwing format: YYYY-MM-DD').optional({checkFalsy: true}).isDate()
+    check("Username").optional({ checkFalsy: true }).not().isEmpty(),
+    check("Password").optional({ checkFalsy: true }).not().isEmpty(),
+    check("Email", "Please enter a valid email.")
+      .optional({ checkFalsy: true })
+      .isEmail(),
+    check("Birthday", "Birthday needs to be in the follwing format: YYYY-MM-DD")
+      .optional({ checkFalsy: true })
+      .isDate(),
   ],
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     console.log(req.user, req.params.Username);
 
-     // check the validation object for errors
-     let errors = validationResult(req);
+    // check the validation object for errors
+    let errors = validationResult(req);
 
-     if (!errors.isEmpty()) {
-       return res.status(422).json({ errors: errors.array() });
-     }
- 
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
     // condition that checks and makes sure that the username in the request body matches the one in the request parameter
     if (req.user.Username !== req.params.Username) {
       return res.status(400).send("Permission denied");
+    }
+
+    let hashedPassword;
+    if (req.body.Password) {
+      hashedPassword = Users.hashPassword(req.body.Password);
     }
 
     await Users.findOneAndUpdate(
@@ -267,7 +276,7 @@ app.put(
       {
         $set: {
           Username: req.body.Username,
-          Password: req.body.Password,
+          Password: hashedPassword,
           Email: req.body.Email,
           Birthday: req.body.Birthday,
         },
