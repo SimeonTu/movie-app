@@ -185,7 +185,10 @@ app.get(
 app.post(
   "/users",
   [
-    check("Username", "Username needs to be a minimum length of 5 characters.").isLength({ min: 5 }),
+    check(
+      "Username",
+      "Username needs to be a minimum length of 5 characters."
+    ).isLength({ min: 5 }),
     check(
       "Username",
       "Username contains non alphanumeric characters - not allowed."
@@ -194,13 +197,13 @@ app.post(
     check("Email", "Email does not appear to be valid").isEmail(),
   ],
   async (req, res) => {
-      // check the validation object for errors
-      let errors = validationResult(req);
+    // check the validation object for errors
+    let errors = validationResult(req);
 
-      if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-      }
-      
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
     let hashedPassword = Users.hashPassword(req.body.Password);
     await Users.findOne({ Username: req.body.Username })
       .then((user) => {
@@ -237,14 +240,28 @@ app.post(
 //6. Allows users to update their info by username
 app.put(
   "/users/:Username",
+  [
+    check("Username").optional({checkFalsy: true}).not().isEmpty(),
+    check('Password').optional({checkFalsy: true}).not().isEmpty(),
+    check('Email', 'Please enter a valid email.').optional({checkFalsy: true}).isEmail(),
+    check('Birthday', 'Birthday needs to be in the follwing format: YYYY-MM-DD').optional({checkFalsy: true}).isDate()
+  ],
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     console.log(req.user, req.params.Username);
-    // CONDITION TO CHECK ADDED HERE
+
+     // check the validation object for errors
+     let errors = validationResult(req);
+
+     if (!errors.isEmpty()) {
+       return res.status(422).json({ errors: errors.array() });
+     }
+ 
+    // condition that checks and makes sure that the username in the request body matches the one in the request parameter
     if (req.user.Username !== req.params.Username) {
       return res.status(400).send("Permission denied");
     }
-    // CONDITION ENDS
+
     await Users.findOneAndUpdate(
       { Username: req.params.Username },
       {
@@ -353,7 +370,7 @@ app.use((err, req, res, next) => {
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
- console.log('Listening on Port ' + port);
+  console.log("Listening on Port " + port);
 });
 
 // npm dev run <-- for starting with nodemon
