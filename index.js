@@ -298,6 +298,12 @@ app.post(
   "/users/:Username/movies/:movieID",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+
+    // condition that checks and makes sure that the username in the request body matches the one in the request parameter
+    if (req.user.Username !== req.params.Username) {
+      return res.status(400).send("Permission denied");
+    }
+
     await Users.findOneAndUpdate(
       { Username: req.params.Username },
       {

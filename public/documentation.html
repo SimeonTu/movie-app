@@ -30,7 +30,7 @@
                 <th>Request</th>
                 <th>URL</th>
                 <th>HTTP Method</th>
-                <th>Request body data format</th>
+                <th>Request data format</th>
                 <th>Response body data format</th>
             </tr>
         </thead>
@@ -85,6 +85,20 @@
                 </td>
                 <td>
                     A JSON object holding data about the user's name, password, email, ID, and favorite movies
+                </td>
+            </tr>
+            <tr>
+                <td>Allows users to login</td>
+                <td>/users</td>
+                <td>POST</td>
+                <td>
+                    The following data is required to be passed as Query Parameters in key-value pairs:<br>
+                    <br>
+                    Username: <i>username</i><br>
+                    Password: <i>password</i>
+                </td>
+                <td>
+                    A JSON object containing the user's information and a JWT token, which is required as a Bearer token in the authorization section of the request headers in every subsequent request to the API
                 </td>
             </tr>
             <tr>
