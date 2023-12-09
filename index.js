@@ -74,7 +74,7 @@ app.get(
       .then((movies) => res.status(200).json(movies))
       .catch((err) => {
         console.log(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -93,16 +93,15 @@ app.get(
         if (movie) {
           res.status(200).json(movie);
         } else {
-          res
-            .status(404)
-            .send(
-              'Movie "' + req.params.title + '" was not found in the database.'
-            ); //find approprivate status code
+          res.status(404).json({
+            error:
+              "Movie " + req.params.title + " was not found in the database.",
+          });
         }
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -121,16 +120,15 @@ app.get(
         if (genre) {
           res.status(200).json(genre);
         } else {
-          res
-            .status(404)
-            .send(
-              'Genre "' + req.params.name + '" was not found in the database.'
-            );
+          res.status(404).json({
+            error:
+              'Genre "' + req.params.name + '" was not found in the database.',
+          });
         }
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -149,18 +147,17 @@ app.get(
         if (director) {
           res.status(200).json(director);
         } else {
-          res
-            .status(404)
-            .send(
+          res.status(404).json({
+            error:
               'Director "' +
-                req.params.name +
-                '" was not found in the database.'
-            );
+              req.params.name +
+              '" was not found in the database.',
+          });
         }
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -172,11 +169,14 @@ app.get(
   async (req, res) => {
     await Users.findOne({ Username: req.params.Username })
       .then((user) => {
+        user = user.toObject(); // removes the password from the returned user object
+        delete user.Password; //
+
         res.json(user);
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -210,7 +210,7 @@ app.post(
         if (user) {
           return res
             .status(400)
-            .send('User "' + req.body.Username + '" already exists');
+            .json({ error: "User " + req.body.Username + " already exists" });
         } else {
           Users.create({
             Username: req.body.Username,
@@ -219,20 +219,25 @@ app.post(
             Birthday: req.body.Birthday,
           })
             .then((user) => {
+              user = user.toObject(); // removes the password from the returned user object
+              delete user.Password; //
+
               res.status(201).json(user);
             })
             .catch((err) => {
               if (err.name === "MongoServerError" && err.code === 11000) {
                 // Duplicate email
-                return res.status(422).send("Email already registered.");
+                return res
+                  .status(422)
+                  .json({ error: "Email already registered." });
               }
               // Some other error
-              return res.status(422).send(err);
+              return res.status(422).json({ error: err });
             });
         }
       })
-      .catch((error) => {
-        res.status(500).send("Error: " + error);
+      .catch((err) => {
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -256,14 +261,14 @@ app.put(
 
     // check the validation object for errors
     let errors = validationResult(req);
-
+    // if an error is found, return an json holding an array of errors found
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
     // condition that checks and makes sure that the username in the request body matches the one in the request parameter
     if (req.user.Username !== req.params.Username) {
-      return res.status(400).send("Permission denied");
+      return res.status(400).json({ error: "Permission denied" });
     }
 
     let hashedPassword;
@@ -284,11 +289,14 @@ app.put(
       { new: true }
     ) // This line makes sure that the updated document is returned
       .then((updatedUser) => {
+        updatedUser = updatedUser.toObject(); // removes the password from the returned user object
+        delete updatedUser.Password; //
+
         res.status(201).json(updatedUser);
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -298,10 +306,9 @@ app.post(
   "/users/:Username/movies/:movieID",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-
     // condition that checks and makes sure that the username in the request body matches the one in the request parameter
     if (req.user.Username !== req.params.Username) {
-      return res.status(400).send("Permission denied");
+      return res.status(400).json({ error: "Permission denied" });
     }
 
     await Users.findOneAndUpdate(
@@ -314,10 +321,13 @@ app.post(
       .populate("FavoriteMovies")
       .exec()
       .then((updatedUser) => {
+        updatedUser = updatedUser.toObject(); // removes the password from the returned user object
+        delete updatedUser.Password; //
+
         res.status(201).json(updatedUser);
       })
       .catch((err) => {
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -327,6 +337,11 @@ app.delete(
   "/users/:Username/movies/:movieID",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+    // condition that checks and makes sure that the username in the request body matches the one in the request parameter
+    if (req.user.Username !== req.params.Username) {
+      return res.status(400).json({ error: "Permission denied" });
+    }
+
     await Users.findOneAndUpdate(
       { Username: req.params.Username },
       {
@@ -335,11 +350,14 @@ app.delete(
       { new: true }
     ) // This line makes sure that the updated document is returned
       .then((updatedUser) => {
+        updatedUser = updatedUser.toObject(); // removes the password from the returned user object
+        delete updatedUser.Password; //
+
         res.json(updatedUser);
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -349,21 +367,24 @@ app.delete(
   "/users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
+    // condition that checks and makes sure that the username in the request body matches the one in the request parameter
+    if (req.user.Username !== req.params.Username) {
+      return res.status(400).json({ error: "Permission denied" });
+    }
+
     await Users.findOneAndDelete({ Username: req.params.Username })
       .then((user) => {
         if (!user) {
           res
             .status(400)
-            .send('User "' + req.params.Username + '" was not found');
+            .json({ error: "User " + req.params.Username + " was not found" });
         } else {
-          res
-            .status(200)
-            .send('User "' + req.params.Username + '" was deleted.');
+          res.status(200).json("User " + req.params.Username + " was deleted.");
         }
       })
       .catch((err) => {
         console.error(err);
-        res.status(500).send("Error: " + err);
+        res.status(500).json({ error: err });
       });
   }
 );
@@ -380,7 +401,7 @@ app.use(function (req, res, next) {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send("Something broke!");
+  res.status(500).json({ error: "Something broke!" });
 });
 
 const port = process.env.PORT || 8080;
