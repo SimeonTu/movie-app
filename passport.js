@@ -13,9 +13,23 @@ passport.use(cors());
 passport.use(
   new LocalStrategy(
     {
-      passReqToCallback: true
+      passReqToCallback: true,
     },
-    async (req, asdsad, asdas, callback) => {
+    async (req, res, asdas, callback) => {
+      // Website you wish to allow to connect
+      res.setHeader("Access-Control-Allow-Origin", "*");
+
+      // Request methods you wish to allow
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+      );
+
+      // Request headers you wish to allow
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "X-Requested-With,content-type"
+      );
       console.log(req.body.username);
       await Users.findOne({ Username: req.body.username })
         .then((user) => {
