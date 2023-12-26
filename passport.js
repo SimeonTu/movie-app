@@ -7,6 +7,13 @@ let Users = Models.User;
 let JWTStrategy = passportJWT.Strategy;
 let ExtractJWT = passportJWT.ExtractJwt;
 
+const cors = require("cors");
+
+passport.use(cors({
+  origin: ['http://localhost:1234'],
+  credentials: true
+}));
+
 passport.use(
   new LocalStrategy(
     {
