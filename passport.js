@@ -8,7 +8,7 @@ let JWTStrategy = passportJWT.Strategy;
 let ExtractJWT = passportJWT.ExtractJwt;
 
 const cors = require("cors");
-passport.use(cors());
+passport.use(cors({ origin: true, credentials: true }));
 
 passport.use(
   new LocalStrategy(
