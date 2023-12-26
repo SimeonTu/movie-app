@@ -15,7 +15,7 @@ passport.use(
     {
       passReqToCallback: true,
     },
-    async (req, res, asdas, callback) => {
+    async (req, res, asdasd, asdas, callback) => {
       // Website you wish to allow to connect
       res.setHeader("Access-Control-Allow-Origin", "*");
 
