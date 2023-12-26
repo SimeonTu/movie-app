@@ -9,10 +9,15 @@ let ExtractJWT = passportJWT.ExtractJwt;
 
 const cors = require("cors");
 
-passport.use(cors({
-  origin: ['http://localhost:1234'],
-  credentials: true
-}));
+passport.use(
+  cors({
+    allowedHeaders: ["authorization", "Content-Type"], // you can change the headers
+    exposedHeaders: ["authorization"], // you can change the headers
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+  })
+);
 
 passport.use(
   new LocalStrategy(

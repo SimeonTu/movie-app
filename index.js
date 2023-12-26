@@ -64,10 +64,15 @@ require("./passport");
 const passport = require("passport");
 const cors = require("cors");
 
-app.use(cors({
-  origin: ['http://localhost:1234'],
-  credentials: true
-}));
+app.use(
+  cors({
+    allowedHeaders: ["authorization", "Content-Type"], // you can change the headers
+    exposedHeaders: ["authorization"], // you can change the headers
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+  })
+);
 
 //1. Return a list of all movies to the user
 app.get(
