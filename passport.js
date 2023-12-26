@@ -15,7 +15,8 @@ passport.use(
     {
       passReqToCallback: true
     },
-    async (req, asdsad, asdas, callback) => {
+    async (req, res, asdas, callback) => {
+      res.header('Access-Control-Allow-Origin', '*');
       console.log(req.body.username);
       await Users.findOne({ Username: req.body.username })
         .then((user) => {
