@@ -12,7 +12,7 @@ let generateJWTToken = (user) => {
 };
 
 const cors = require("cors");
-app.use(cors());
+passport.use(cors());
 
 /* POST login. */
 module.exports = (router) => {
