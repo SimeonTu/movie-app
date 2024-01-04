@@ -246,14 +246,14 @@ app.post(
 app.put(
   "/users/:Username",
   [
-    check("Username").optional({ checkFalsy: true }).not().isEmpty(),
-    check("Password").optional({ checkFalsy: true }).not().isEmpty(),
-    check("Email", "Please enter a valid email.")
-      .optional({ checkFalsy: true })
-      .isEmail(),
-    check("Birthday", "Birthday needs to be in the follwing format: YYYY-MM-DD")
-      .optional({ checkFalsy: true })
-      .isDate(),
+    oneOf([
+      body("Username").not().isEmpty(),
+      body("Password").not().isEmpty(),
+      body("Email", "Please enter a valid email.")
+        .isEmail(),
+        body("Birthday", "Birthday needs to be in the follwing format: YYYY-MM-DD")
+        .isDate()
+    ])
   ],
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
