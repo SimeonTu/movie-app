@@ -6,7 +6,7 @@ const fs = require("fs");
 const path = require("path");
 const mongoose = require("mongoose");
 const Models = require("./models.js");
-const { check, oneOf, validationResult } = require("express-validator");
+const { check, oneOf, body, validationResult } = require("express-validator");
 
 const Movies = Models.Movie;
 const Users = Models.User;
