@@ -169,8 +169,9 @@ app.get(
   async (req, res) => {
     await Users.findOne({ Username: req.params.Username })
       .then((user) => {
-        user = user.toObject(); // removes the password from the returned user object
-        delete user.Password; //
+        // Users.hashPassword(user.Password);
+        // user = user.toObject(); // removes the password from the returned user object
+        // delete user.Password; //
 
         res.json(user);
       })
@@ -249,11 +250,12 @@ app.put(
     oneOf([
       body("Username").not().isEmpty(),
       body("Password").not().isEmpty(),
-      body("Email", "Please enter a valid email.")
-        .isEmail(),
-        body("Birthday", "Birthday needs to be in the follwing format: YYYY-MM-DD")
-        .isDate()
-    ])
+      body("Email", "Please enter a valid email.").isEmail(),
+      body(
+        "Birthday",
+        "Birthday needs to be in the follwing format: YYYY-MM-DD"
+      ).isDate(),
+    ]),
   ],
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
