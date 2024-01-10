@@ -64,6 +64,11 @@ require("./passport");
 const passport = require("passport");
 const cors = require("cors");
 app.use(cors());
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", "*");
+  next();
+});
 
 //1. Return a list of all movies to the user
 app.get(
@@ -167,10 +172,11 @@ app.get(
   "/users/:Username",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-
     // condition that checks and makes sure that the username in the request body matches the one in the request parameter
     if (req.user.Username !== req.params.Username || !req.params.Username) {
-      return res.status(400).json({ error: "Permission denied or user doesn't exist" });
+      return res
+        .status(400)
+        .json({ error: "Permission denied or user doesn't exist" });
     }
 
     await Users.findOne({ Username: req.params.Username })
