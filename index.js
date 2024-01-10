@@ -64,11 +64,6 @@ require("./passport");
 const passport = require("passport");
 const cors = require("cors");
 app.use(cors());
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://localhost:1234"); // update to match the domain you will make the request from
-  res.header("Access-Control-Allow-Headers", "DELETE");
-  next();
-});
 
 //1. Return a list of all movies to the user
 app.get(
@@ -355,6 +350,8 @@ app.delete(
     if (req.user.Username !== req.params.Username) {
       return res.status(400).json({ error: "Permission denied" });
     }
+
+    res.header("Access-Control-Allow-Origin", "http://localhost:1234"); // update to match the domain you will make the request from
 
     await Users.findOneAndUpdate(
       { Username: req.params.Username },
