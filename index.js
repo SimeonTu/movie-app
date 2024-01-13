@@ -65,17 +65,6 @@ const passport = require("passport");
 const cors = require("cors");
 app.use(cors());
 
-var whitelist = ["http://localhost:1234"];
-var corsOptionsDelegate = function (req, callback) {
-  var corsOptions;
-  if (whitelist.indexOf(req.header("Origin")) !== -1) {
-    corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
-  } else {
-    corsOptions = { origin: false }; // disable CORS for this request
-  }
-  callback(null, corsOptions); // callback expects two parameters: error and options
-};
-
 //1. Return a list of all movies to the user
 app.get(
   "/movies",
@@ -355,7 +344,6 @@ app.post(
 //8. Allows users to remove a movie from their list of favorites
 app.delete(
   "/users/:Username/movies/:movieID",
-  cors(corsOptionsDelegate),
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     // condition that checks and makes sure that the username in the request body matches the one in the request parameter
