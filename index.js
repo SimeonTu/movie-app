@@ -345,8 +345,8 @@ app.post(
       },
       { new: true } // This line makes sure that the updated document is returned
     )
-      .populate("FavoriteMovies")
-      .exec()
+      // .populate("FavoriteMovies")
+      // .exec()
       .then((updatedUser) => {
         updatedUser = updatedUser.toObject(); // removes the password from the returned user object
         delete updatedUser.Password; //
