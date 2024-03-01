@@ -65,7 +65,7 @@ require("./passport");
 const passport = require("passport");
 
 const cors = require("cors");
-let allowedOrigins = ["https://ifdbase.netlify.app", "http://localhost:1234", "http://localhost:4200", "https://simeontu.github.io/movie-app-client-angular"];
+let allowedOrigins = ["https://ifdbase.netlify.app", "http://localhost:1234", "http://localhost:4200", "https://simeontu.github.io"];
 
 app.use(
   cors({

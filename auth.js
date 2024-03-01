@@ -15,7 +15,7 @@ let generateJWTToken = (user) => {
 // passport.use(cors());
 
 const cors = require("cors");
-let allowedOrigins = ["https://ifdbase.netlify.app", "http://localhost:1234", "http://localhost:4200"];
+let allowedOrigins = ["https://ifdbase.netlify.app", "http://localhost:1234", "http://localhost:4200", "https://simeontu.github.io"];
 
 passport.use(
   cors({
