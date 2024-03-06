@@ -1,0 +1,685 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "IFDb API",
+    "version": "1.0.0",
+    "description": "API documentation for the IFDb web app"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "schemes": ["http"],
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "paths": {
+    "/movies": {
+      "get": {
+        "summary": "Get list of all movies",
+        "description": "Returns a list of all movies available",
+        "produces": ["application/json"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of movies",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Movie"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/movies/{title}": {
+      "get": {
+        "summary": "Get movie by title",
+        "description": "Returns data about a single movie by title",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "title",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Title of the movie"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Movie found",
+            "schema": {
+              "$ref": "#/definitions/Movie"
+            }
+          },
+          "404": {
+            "description": "Movie not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/genres/{name}": {
+      "get": {
+        "summary": "Get genre by name",
+        "description": "Returns data about a genre by name",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Name of the genre"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Genre found",
+            "schema": {
+              "$ref": "#/definitions/Genre"
+            }
+          },
+          "404": {
+            "description": "Genre not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/directors/{name}": {
+      "get": {
+        "summary": "Get director by name",
+        "description": "Returns data about a director by name",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Name of the director"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Director found",
+            "schema": {
+              "$ref": "#/definitions/Director"
+            }
+          },
+          "404": {
+            "description": "Director not found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users/{Username}": {
+      "get": {
+        "summary": "Get user by username",
+        "description": "Returns data about a user by username",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Username",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Username of the user"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "summary": "Register new user",
+        "description": "Allows new users to register",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NewUser"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User created",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "422": {
+            "description": "Validation error or email already registered",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "msg": {
+                        "type": "string"
+                      },
+                      "param": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{Username}/movies/{movieID}": {
+      "post": {
+        "summary": "Add movie to user's favorites",
+        "description": "Allows users to add a movie to their list of favorites",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Username",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Username of the user"
+          },
+          {
+            "name": "movieID",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the movie to be added to favorites"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Movie added to user's favorites and the user object is returned",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Permission denied or bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{UsernamePut}": {
+      "put": {
+        "summary": "Update user info by username",
+        "description": "Allows users to update their info by username",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Username",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Username of the user"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUser"
+            }
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User info updated",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Bad request or permission denied",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                },
+                "errors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "msg": {
+                        "type": "string"
+                      },
+                      "param": {
+                        "type": "string"
+                      },
+                      "location": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{UsernameDel}/movies/{movieID}": {
+      "delete": {
+        "summary": "Remove movie from user's favorites",
+        "description": "Allows users to remove a movie from their list of favorites",
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "Username",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Username of the user"
+          },
+          {
+            "name": "movieID",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the movie to be removed from favorites"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Movie removed from user's favorites",
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "400": {
+            "description": "Permission denied or bad request",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{UsernameDel}": {
+        "delete": {
+          "summary": "Deregister existing user",
+          "description": "Allows existing users to deregister",
+          "produces": ["application/json"],
+          "parameters": [
+            {
+              "name": "Username",
+              "in": "path",
+              "required": true,
+              "type": "string",
+              "description": "Username of the user to be deregistered"
+            }
+          ],
+          "security": [{
+            "BearerAuth": []
+          }],
+          "responses": {
+            "200": {
+              "description": "User deregistered",
+              "schema": {
+                "$ref": "#/definitions/User"
+              }
+            },
+            "400": {
+              "description": "Permission denied or user not found",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "500": {
+              "description": "Internal server error",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+  },
+  "definitions": {
+    "UpdateUser": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "Email": {
+          "type": "string"
+        },
+        "Birthday": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": []
+    },
+    "NewUser": {
+      "type": "object",
+      "properties": {
+        "Username": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "Email": {
+          "type": "string"
+        },
+        "Birthday": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["Username", "Password", "Email", "Birthday"]
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "Username": {
+          "type": "string"
+        },
+        "Password": {
+          "type": "string"
+        },
+        "Email": {
+          "type": "string"
+        },
+        "Birthday": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "FavoriteMovies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "__v": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "_id",
+        "Username",
+        "Password",
+        "Email",
+        "Birthday",
+        "FavoriteMovies",
+        "__v"
+      ]
+    },
+    "Movie": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "genre": {
+          "$ref": "#/definitions/Genre"
+        },
+        "director": {
+          "$ref": "#/definitions/Director"
+        },
+        "releaseYear": {
+          "type": "integer"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "featured": {
+          "type": "boolean"
+        },
+        "image": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "genre",
+        "director",
+        "releaseYear",
+        "rating",
+        "featured",
+        "image"
+      ]
+    },
+    "Genre": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        }
+      },
+      "required": ["Name", "Description"]
+    },
+    "Director": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Bio": {
+          "type": "string"
+        }
+      },
+      "required": ["Name", "Bio"]
+    }
+  }
+}

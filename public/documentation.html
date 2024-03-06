@@ -74,13 +74,14 @@
                 <td>/users</td>
                 <td>POST</td>
                 <td>
-                    A JSON object containing a username, password, and email (keys should be in lowercase)<br>
+                    A JSON object containing a username, password, email, and birthday (keys should be in lowercase)<br>
                     <br>
                     Example:<br>
                     {<br>
-                    &nbsp;&nbsp;"username": "JimBob",<br>
-                    &nbsp;&nbsp;"password": "abcd1234",<br>
-                    &nbsp;&nbsp;"email": "jimbobjoe@example.com"<br>
+                    &nbsp;&nbsp;"Username": "JimBob",<br>
+                    &nbsp;&nbsp;"Password": "abcd1234",<br>
+                    &nbsp;&nbsp;"Email": "jimbobjoe@example.com"<br>
+                    &nbsp;&nbsp;"Birthday": "1945-01-01"<br>
                     }
                 </td>
                 <td>
@@ -92,13 +93,17 @@
                 <td>/login</td>
                 <td>POST</td>
                 <td>
-                    The following data is required to be passed as Query Parameters in key-value pairs:<br>
+                    A JSON object containing a username and password (Username and Password must be capitalized)<br>
                     <br>
-                    Username: <i>username</i><br>
-                    Password: <i>password</i>
+                    Example:<br>
+                    {<br>
+                    &nbsp;&nbsp;"Username": "JimBob",<br>
+                    &nbsp;&nbsp;"Password": "abcd1234",<br>
+                    }
                 </td>
                 <td>
-                    A JSON object containing the user's information and a JWT token, which is required as a Bearer token in the authorization section of the request headers in every subsequent request to the API
+                    A JSON object containing the user's information and a JWT token, which is required as a Bearer token
+                    in the authorization section of the request headers in every subsequent request to the API
                 </td>
             </tr>
             <tr>
@@ -110,7 +115,7 @@
                     <br>
                     Example:<br>
                     {<br>
-                    &nbsp;&nbsp;"Birth_Date": "1945-01-01"<br>
+                    &nbsp;&nbsp;"Birthday": "1945-01-01"<br>
                     }
                 </td>
                 <td>
